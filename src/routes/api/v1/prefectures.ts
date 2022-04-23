@@ -1,5 +1,5 @@
-import resasCli from '$lib/utils/resasCli';
-import type { ResasResponse } from '$lib/utils/resasCli';
+import resasCli from '$lib/utils/resas-cli';
+import type { ResasResponse } from '$lib/utils/resas-cli';
 
 /** @type {import('./prefectures').RequestHandler} */
 export async function get() {
