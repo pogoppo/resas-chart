@@ -13,6 +13,7 @@ type Cache = {
 }
 
 export default class {
+  processing = false;
   chart: echarts.EChartsType;
   private xAxisData: Set<string> = new Set();
   private series: EChartOption.Series[] = [];
@@ -33,7 +34,7 @@ export default class {
       yAxis: {
         type: 'value',
         name: '人口数',
-        boundaryGap: ['50%', '50%'],
+        boundaryGap: [0, '20%'],
         axisLabel: {
           formatter(value: number) {
             switch (true) {
@@ -44,11 +45,17 @@ export default class {
           }
         }
       },
-      series: [...this.series]
+      series: this.series
     });
   }
 
   async update(prefCodeList: number[]) {
+    if (this.processing) {
+      return;
+    }
+
+    this.processing = true;
+
     this.clear();
 
     for (const prefCode of prefCodeList) {
@@ -57,12 +64,19 @@ export default class {
       await Promise.all([timer, process]);
     }
 
+    // `replaceMerge`等のオプションを考慮した型になっていないが、このオプションは実装されている
+    // 解決するまで`Unexpected any.`の警告は残す
+    // https://github.com/apache/echarts/issues/6202#issuecomment-974761211
     this.chart.setOption({
       xAxis: {
         data: [...this.xAxisData]
       },
       series: [...this.series]
-    });
+    }, {
+      replaceMerge: ['series']
+    } as any);
+
+    this.processing = false;
   }
 
   private async add(prefCode: number) {
@@ -99,14 +113,11 @@ export default class {
     });
     this.cache[prefCode].seriesData = seriesData;
     const prefectures = get(prefecturesMap);
-    console.log(prefectures);
-    this.series = [
-      {
-        name: prefectures[prefCode],
-        type: 'line',
-        data: seriesData
-      }
-    ];
+    this.series = [...this.series, {
+      name: prefectures[prefCode],
+      type: 'line',
+      data: seriesData
+    }];
   }
 
   private addFromCache(prefCode: number) {
@@ -114,13 +125,11 @@ export default class {
       this.xAxisData.add(String(year));
     });
     const prefectures = get(prefecturesMap);
-    this.series = [
-      {
-        name: prefectures[prefCode],
-        type: 'line',
-        data: this.cache[prefCode].seriesData
-      }
-    ];
+    this.series = [...this.series, {
+      name: prefectures[prefCode],
+      type: 'line',
+      data: this.cache[prefCode].seriesData
+    }];
   }
 
   private clear() {
