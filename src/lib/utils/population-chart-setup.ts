@@ -59,9 +59,7 @@ export default class {
     this.clear();
 
     for (const prefCode of prefCodeList) {
-      const timer = new Promise(resolve => setTimeout(resolve, 250)); // throttle用タイマー
-      const process = this.add(prefCode);
-      await Promise.all([timer, process]);
+      await this.add(prefCode);
     }
 
     // `replaceMerge`等のオプションを考慮した型になっていないが、このオプションは実装されている
@@ -87,8 +85,12 @@ export default class {
         seriesData: [],
         xAxisOrderedData: []
       };
+
       const resasHubRepo = new ResasHub();
       const rawChartData = await resasHubRepo.getPopulation(prefCode);
+      const timer = new Promise(resolve => setTimeout(resolve, 250)); // throttle用タイマー
+      await Promise.all([timer, rawChartData]);
+
       this.addXAxisData(rawChartData);
       this.addSeries(rawChartData);
     }
