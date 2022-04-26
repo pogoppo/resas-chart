@@ -12,6 +12,17 @@
 	let populationChartRender: HTMLElement;
 	let populationChartObj: PopulationChart;
 
+	// 都道府県コードを東北、関東などでグループ分け
+	const prefectureGroup = [
+		[1, 2, 3, 4, 5, 6, 7],
+		[8, 9, 10, 11, 12, 13, 14],
+		[15, 16, 17, 18, 19, 20, 21, 22, 23],
+		[24, 25, 26, 27, 28, 29, 30],
+		[31, 32, 33, 34, 35],
+		[36, 37, 38, 39],
+		[40, 41, 42, 43, 44, 45, 46, 47]
+	];
+
 	const updateChart = async () => {
 		const updatePromise = populationChartObj.update([...$prefectures]);
 		// Proxyしてくれないので無理やり伝達
@@ -46,23 +57,32 @@
 
 <svelte:head>
 	<title>都道府県別人口推移グラフ</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+	<link
+		href="https://fonts.googleapis.com/css2?family=Murecho:wght@900&display=swap&text=都道府県別人口推移グラフ"
+		rel="stylesheet"
+	/>
 </svelte:head>
 
 <h1 class="PopulationChartTitle">都道府県別人口推移グラフ</h1>
 
 <section class="PopulationChart">
 	<nav class="PopulationChartPrefectures">
-		<ol class="PopulationChartPrefectures__list">
-			{#each Object.entries($prefecturesMap) as [code, name]}
-				<li
-					class="PopulationChartPrefectures__item"
-					class:PopulationChartPrefectures__item--active={$prefectures.has(Number(code))}
-					on:click={() => switchPrefecture(Number(code))}
-				>
-					{name}
-				</li>
-			{/each}
-		</ol>
+		{#each prefectureGroup as list}
+			<ol class="PopulationChartPrefectures__list">
+				{#each list as code}
+					<li
+						class="PopulationChartPrefectures__item"
+						class:PopulationChartPrefectures__item--active={$prefectures.has(code)}
+						style={`--graph-color: ${populationChartObj?.colorMap[code] ?? '#AAA'}`}
+						on:click={() => switchPrefecture(code)}
+					>
+						{$prefecturesMap[code]}
+					</li>
+				{/each}
+			</ol>
+		{/each}
 	</nav>
 
 	<div
@@ -94,15 +114,16 @@
 		}
 	}
 	.PopulationChartTitle {
-		margin: 0;
-		margin-bottom: 16px;
+		margin: 16px;
+		font-family: 'Murecho', sans-serif;
 		font-size: min(32px, 6vw);
+		letter-spacing: 2px;
 	}
 
 	.PopulationChart {
 		&__render {
 			width: 100%;
-			height: 320px;
+			height: 480px;
 			background-color: var(--theme-color-light);
 		}
 		&__render-overray-spinner {
@@ -138,7 +159,10 @@
 		}
 	}
 	.PopulationChartPrefectures {
-		margin-bottom: 16px;
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		margin: 16px;
 	}
 	.PopulationChartPrefectures {
 		&__list {
@@ -149,6 +173,10 @@
 			width: 100%;
 			margin: 0;
 			padding: 0;
+			&:not(:last-child) {
+				padding-bottom: 8px;
+				border-bottom: 1px dashed var(--theme-color-softlight);
+			}
 		}
 		&__item {
 			position: relative;
@@ -165,8 +193,9 @@
 					left: 0;
 					width: 100%;
 					height: 50%;
-					background-color: var(--theme-color-accent-reverse);
+					background-color: var(--graph-color);
 					mix-blend-mode: multiply;
+					opacity: 0.5;
 				}
 			}
 		}

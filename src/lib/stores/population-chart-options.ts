@@ -1,7 +1,7 @@
 import { browser } from '$app/env';
 import { writable } from 'svelte/store';
 
-const defaultValue = new Set([1, 13, 27]); // 北海道、東京都、大阪府の都道府県コード
+const defaultValue = new Set([1, 13, 27, 47]); // 北海道、東京都、大阪府、沖縄県の都道府県コード
 const initialValue = (() => {
   if (!browser) {
     return defaultValue;

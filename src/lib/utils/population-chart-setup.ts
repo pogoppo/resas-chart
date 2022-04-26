@@ -15,6 +15,8 @@ type Cache = {
 export default class {
   processing = false;
   chart: echarts.EChartsType;
+  colorMap: { [prefCode: number]: string } = {};
+
   private xAxisData: Set<string> = new Set();
   private series: EChartOption.Series[] = [];
   private cache: Cache = {};
@@ -28,14 +30,24 @@ export default class {
       xAxis: {
         type: 'category',
         name: '年度',
+        nameTextStyle: {
+          'fontWeight': 'bold'
+        },
         boundaryGap: false,
+        nameGap: 8,
         data: [...this.xAxisData]
       },
       yAxis: {
         type: 'value',
         name: '人口数',
-        boundaryGap: [0, '20%'],
+        nameTextStyle: {
+          'fontWeight': 'bold'
+        },
+        boundaryGap: false,
+        offset: -16,
+        nameGap: 16,
         axisLabel: {
+          showMinLabel: false,
           formatter(value: number) {
             switch (true) {
               case value >= 10000:
@@ -73,6 +85,8 @@ export default class {
     }, {
       replaceMerge: ['series']
     } as any);
+
+    this.mapColor(prefCodeList);
 
     this.processing = false;
   }
@@ -134,7 +148,25 @@ export default class {
     }];
   }
 
+  private mapColor(prefCodeList: number[]) {
+    const chartOption = this.chart.getOption();
+    const themeColors = chartOption.color;
+
+    if (!themeColors) {
+      return;
+    }
+
+    prefCodeList.forEach((code, index) => {
+      if (themeColors.length > index) {
+        this.colorMap[code] = themeColors[index];
+      } else {
+        this.colorMap[code] = themeColors[index % themeColors.length];
+      }
+    });
+  }
+
   private clear() {
+    this.colorMap = {};
     this.xAxisData.clear();
     this.series = [];
   }
