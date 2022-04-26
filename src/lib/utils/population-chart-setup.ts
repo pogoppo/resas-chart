@@ -3,7 +3,7 @@ import type { EChartOption } from "echarts";
 
 import ResasHub, { type Population } from '$lib/repositories/resas-hub';
 import { prefecturesMap } from '$lib/stores/prefectures-map';
-import { get } from 'svelte/store';
+import { get, writable } from 'svelte/store';
 
 type Cache = {
   [prefCode: number]: {
@@ -12,10 +12,10 @@ type Cache = {
   }
 }
 
+export const processQueue = writable<boolean[]>([]);
+
 export default class {
-  processing = false;
   chart: echarts.EChartsType;
-  colorMap: { [prefCode: number]: string } = {};
 
   private xAxisData: Set<string> = new Set();
   private series: EChartOption.Series[] = [];
@@ -62,11 +62,11 @@ export default class {
   }
 
   async update(prefCodeList: number[]) {
-    if (this.processing) {
+    if (get(processQueue).length) {
       return;
     }
 
-    this.processing = true;
+    processQueue.set([...get(processQueue), true]);
 
     this.clear();
 
@@ -86,9 +86,8 @@ export default class {
       replaceMerge: ['series']
     } as any);
 
-    this.mapColor(prefCodeList);
-
-    this.processing = false;
+    get(processQueue).pop();
+    processQueue.set([...get(processQueue)]);
   }
 
   private async add(prefCode: number) {
@@ -148,25 +147,7 @@ export default class {
     }];
   }
 
-  private mapColor(prefCodeList: number[]) {
-    const chartOption = this.chart.getOption();
-    const themeColors = chartOption.color;
-
-    if (!themeColors) {
-      return;
-    }
-
-    prefCodeList.forEach((code, index) => {
-      if (themeColors.length > index) {
-        this.colorMap[code] = themeColors[index];
-      } else {
-        this.colorMap[code] = themeColors[index % themeColors.length];
-      }
-    });
-  }
-
   private clear() {
-    this.colorMap = {};
     this.xAxisData.clear();
     this.series = [];
   }

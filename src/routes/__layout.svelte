@@ -5,7 +5,7 @@
 	import ResasHub from '$lib/repositories/resas-hub';
 	import { prefecturesMap, type PrefecturesMap } from '$lib/stores/prefectures-map';
 
-	import Header from '$lib/header/Header.svelte';
+	import Header from '$lib/components/Header.svelte';
 	import '../app.css';
 
 	const init = async () => {
