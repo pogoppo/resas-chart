@@ -1,4 +1,7 @@
 <script lang="ts">
+	import { init as i18nInit, addMessages } from 'svelte-i18n';
+	import ja from '$lib/configs/i18n-ja.json';
+
 	import * as echarts from 'echarts';
 	import echartsTheme from '$lib/configs/echarts-theme.json';
 
@@ -9,6 +12,12 @@
 	import '../app.css';
 
 	const init = async () => {
+		i18nInit({
+			initialLocale: 'ja',
+			fallbackLocale: 'ja'
+		});
+		addMessages('ja', ja);
+
 		const prefectures: PrefecturesMap = {};
 		const resasHubRepo = new ResasHub();
 		const rawPrefData = await resasHubRepo.getPrefectures();

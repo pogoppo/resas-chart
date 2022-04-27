@@ -1,0 +1,14 @@
+{
+	"page": {
+		"index": {
+			"title": "都道府県別人口推移グラフ"
+		}
+	},
+	"chart": {
+		"population": {
+			"yAxisName": "人口数",
+			"xAxisName": "年度",
+			"yAxisUnit100k": "万"
+		}
+	}
+}

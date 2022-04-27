@@ -1,9 +1,11 @@
+import { get, writable } from 'svelte/store';
+import { _ } from 'svelte-i18n'
+
 import * as echarts from 'echarts';
 import type { EChartOption } from "echarts";
 
 import ResasHub, { type Population } from '$lib/repositories/resas-hub';
 import { prefecturesMap } from '$lib/stores/prefectures-map';
-import { get, writable } from 'svelte/store';
 
 type Cache = {
   [prefCode: number]: {
@@ -21,6 +23,7 @@ export default class {
   private series: EChartOption.Series[] = [];
   private cache: Cache = {};
 
+
   constructor(render: HTMLElement) {
     this.chart = echarts.init(render, 'resas');
     this.chart.setOption({
@@ -29,7 +32,7 @@ export default class {
       },
       xAxis: {
         type: 'category',
-        name: '年度',
+        name: get(_)('chart.population.xAxisName'),
         nameTextStyle: {
           'fontWeight': 'bold'
         },
@@ -39,7 +42,7 @@ export default class {
       },
       yAxis: {
         type: 'value',
-        name: '人口数',
+        name: get(_)('chart.population.yAxisName'),
         nameTextStyle: {
           'fontWeight': 'bold'
         },
@@ -50,8 +53,11 @@ export default class {
           showMinLabel: false,
           formatter(value: number) {
             switch (true) {
-              case value >= 10000:
-                return `${Math.round(value / (10000 / 10)) / 10}万`;
+              case value >= 10000: {
+                const roundedValue = Math.round(value / (10000 / 10)) / 10;
+                const unit = get(_)('chart.population.yAxisUnit100k');
+                return String(roundedValue) + unit;
+              }
             }
             return value;
           }

@@ -3,7 +3,8 @@
 </script>
 
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
+	import { _ } from 'svelte-i18n';
 
 	import PopulationChart from '$lib/utils/population-chart-setup';
 	import { prefectures } from '$lib/stores/population-chart-options';
@@ -13,15 +14,22 @@
 
 	let populationChartObj: PopulationChart;
 	let populationChartRender: HTMLElement;
+	const resizeChartEvent = () => {
+		populationChartObj.chart.resize();
+	};
 
 	onMount(() => {
 		populationChartObj = new PopulationChart(populationChartRender);
 		populationChartObj.update([...$prefectures]);
+		window.addEventListener('resize', resizeChartEvent);
+	});
+	onDestroy(() => {
+		window.removeEventListener('resize', resizeChartEvent);
 	});
 </script>
 
 <svelte:head>
-	<title>都道府県別人口推移グラフ</title>
+	<title>{$_('page.index.title')}</title>
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
 	<link
@@ -30,7 +38,7 @@
 	/>
 </svelte:head>
 
-<h1 class="PopulationChartTitle">都道府県別人口推移グラフ</h1>
+<h1 class="PopulationChartTitle">{$_('page.index.title')}</h1>
 
 <section>
 	{#if populationChartObj}
