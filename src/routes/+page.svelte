@@ -1,7 +1,3 @@
-<script context="module" lang="ts">
-	export const prerender = true;
-</script>
-
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
 	import { _ } from 'svelte-i18n';

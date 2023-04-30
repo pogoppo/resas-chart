@@ -1,4 +1,4 @@
-import { get, writable } from 'svelte/store';
+import { get, readonly, writable } from 'svelte/store';
 import { _ } from 'svelte-i18n'
 
 import * as echarts from 'echarts';
@@ -14,7 +14,8 @@ type Cache = {
   }
 }
 
-export const processQueue = writable<boolean[]>([]);
+const isProcessing = writable<boolean>(false);
+export const populationChartProcessing = readonly(isProcessing);
 
 export default class {
   chart: echarts.EChartsType;
@@ -68,11 +69,11 @@ export default class {
   }
 
   async update(prefCodeList: number[]) {
-    if (get(processQueue).length) {
+    if (get(isProcessing)) {
       return;
     }
 
-    processQueue.set([...get(processQueue), true]);
+    isProcessing.set(true);
 
     this.clear();
 
@@ -92,8 +93,7 @@ export default class {
       replaceMerge: ['series']
     } as any);
 
-    get(processQueue).pop();
-    processQueue.set([...get(processQueue)]);
+    isProcessing.set(false);
   }
 
   private async add(prefCode: number) {

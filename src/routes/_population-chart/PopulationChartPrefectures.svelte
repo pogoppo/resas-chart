@@ -2,7 +2,7 @@
 	import { prefecturesMap } from '$lib/stores/prefectures-map';
 	import { prefectures } from '$lib/stores/population-chart-options';
 	import type PopulationChart from '$lib/utils/population-chart-setup';
-	import { processQueue } from '$lib/utils/population-chart-setup';
+	import { populationChartProcessing } from '$lib/utils/population-chart-setup';
 
 	export let populationChartObj: PopulationChart;
 
@@ -20,7 +20,7 @@
 	const colorMap: { [prefCode: number]: string } = {};
 
 	const switchPrefecture = (prefCode: number) => {
-		if ($processQueue.length) {
+		if ($populationChartProcessing) {
 			return;
 		}
 
@@ -59,14 +59,14 @@
 	};
 
 	$: {
-		$processQueue;
+		$populationChartProcessing;
 		mapColor([...$prefectures]);
 	}
 </script>
 
 <nav
 	class="PopulationChartPrefectures"
-	class:PopulationChartPrefectures--processing={$processQueue.length}
+	class:PopulationChartPrefectures--processing={$populationChartProcessing}
 >
 	{#each prefectureGroup as list}
 		<ol class="PopulationChartPrefectures__list">
@@ -76,6 +76,7 @@
 					class:PopulationChartPrefectures__item--active={$prefectures.has(code)}
 					style={`--graph-color: ${colorMap[code] ?? '#AAA'}`}
 					on:click={() => switchPrefecture(code)}
+					on:keypress={() => switchPrefecture(code)}
 				>
 					{$prefecturesMap[code]}
 				</li>

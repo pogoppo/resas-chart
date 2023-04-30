@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { ResasResponse } from '$lib/utils/resas-cli';
+import type { ResasOKResponse } from '$lib/utils/resas-cli';
 
 const cli = axios.create();
 
@@ -13,14 +13,19 @@ export type Population = {
   data: { year: number, value: number }[]
 }
 
+type PerYear = {
+  boundaryYear: number,
+  data: { label: string, data: Population["data"] }[]
+}
+
 export default class {
   async getPrefectures(): Promise<Prefectures[]> {
     // データ構成
     // https://opendata.resas-portal.go.jp/docs/api/v1/prefectures.html
     const response = await cli.get(`/api/v1/prefectures`);
-    const rawData: ResasResponse = response.data;
+    const rawData: ResasOKResponse<Prefectures[]> = response.data;
 
-    return rawData.result as Prefectures[];
+    return rawData.result;
   }
 
   async getPopulation(prefCode: number): Promise<Population> {
@@ -29,12 +34,12 @@ export default class {
     // データ構成
     // https://opendata.resas-portal.go.jp/docs/api/v1/population/composition/perYear.html
     const response = await cli.get(`/api/v1/population/composition/perYear`, { params });
-    const rawData: ResasResponse = response.data;
+    const rawData: ResasOKResponse<PerYear> = response.data;
+    const data: Population["data"] = rawData.result.data[0].data;
 
     return {
       prefCode,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      data: (rawData.result as any).data[0].data
+      data
     }
   }
 }

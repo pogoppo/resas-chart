@@ -1,10 +1,8 @@
 import axios from 'axios';
 
-export type ResasResponse = {
-  statusCode?: string
+export type ResasOKResponse<T> = {
   message: string | null
-  description?: string
-  result?: unknown
+  result: T
 }
 
 export default axios.create({

@@ -1,14 +1,17 @@
 <script lang="ts">
-	import { processQueue } from '$lib/utils/population-chart-setup';
+	import { populationChartProcessing } from '$lib/utils/population-chart-setup';
 	export let populationChartRender: HTMLElement;
 </script>
 
-<div class="PopulationChartRender" class:PopulationChartRender--processing={$processQueue.length}>
+<div
+	class="PopulationChartRender"
+	class:PopulationChartRender--processing={$populationChartProcessing}
+>
 	<svg
 		xmlns="http://www.w3.org/2000/svg"
 		viewBox="0 0 512 512"
 		class="PopulationChartRender__spinner"
-		class:PopulationChartRender__spinner--processing={$processQueue.length}
+		class:PopulationChartRender__spinner--processing={$populationChartProcessing}
 	>
 		<!--! Font Awesome Pro 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. -->
 		<path
