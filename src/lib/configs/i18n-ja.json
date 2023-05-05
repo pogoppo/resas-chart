@@ -10,5 +10,8 @@
 			"xAxisName": "年度",
 			"yAxisUnit100k": "万"
 		}
+	},
+	"error": {
+		"populationChart": "グラフの作成に失敗しました。"
 	}
 }

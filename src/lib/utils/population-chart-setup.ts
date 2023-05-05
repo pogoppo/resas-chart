@@ -4,8 +4,9 @@ import { _ } from 'svelte-i18n'
 import * as echarts from 'echarts';
 import type { EChartOption } from "echarts";
 
-import ResasHub, { type Population } from '$lib/repositories/resas-hub';
-import { prefecturesMap } from '$lib/stores/prefectures-map';
+import type ResasHub from '$lib/repositories/resas-hub';
+import type { Population } from '$lib/repositories/resas-hub';
+import type { PrefecturesMap } from '$lib/stores/population-chart-options';
 
 type Cache = {
   [prefCode: number]: {
@@ -19,13 +20,17 @@ export const populationChartProcessing = readonly(isProcessing);
 
 export default class {
   chart: echarts.EChartsType;
+  prefecturesMap: PrefecturesMap;
 
   private xAxisData: Set<string> = new Set();
   private series: EChartOption.Series[] = [];
   private cache: Cache = {};
+  private repository: ResasHub;
 
+  constructor(render: HTMLElement, repository: ResasHub, prefecturesMap: PrefecturesMap) {
+    this.repository = repository;
+    this.prefecturesMap = prefecturesMap;
 
-  constructor(render: HTMLElement) {
     this.chart = echarts.init(render, 'resas');
     this.chart.setOption({
       tooltip: {
@@ -105,8 +110,7 @@ export default class {
         xAxisOrderedData: []
       };
 
-      const resasHubRepo = new ResasHub();
-      const rawChartData = await resasHubRepo.getPopulation(prefCode);
+      const rawChartData = await this.repository.getPopulation(prefCode);
       const timer = new Promise(resolve => setTimeout(resolve, 250)); // throttle用タイマー
       await Promise.all([timer, rawChartData]);
 
@@ -133,9 +137,8 @@ export default class {
       return [String(obj.year), obj.value];
     });
     this.cache[prefCode].seriesData = seriesData;
-    const prefectures = get(prefecturesMap);
     this.series = [...this.series, {
-      name: prefectures[prefCode],
+      name: this.prefecturesMap[prefCode],
       type: 'line',
       data: seriesData
     }];
@@ -145,9 +148,8 @@ export default class {
     this.cache[prefCode].xAxisOrderedData.forEach((year) => {
       this.xAxisData.add(String(year));
     });
-    const prefectures = get(prefecturesMap);
     this.series = [...this.series, {
-      name: prefectures[prefCode],
+      name: this.prefecturesMap[prefCode],
       type: 'line',
       data: this.cache[prefCode].seriesData
     }];

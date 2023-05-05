@@ -1,14 +1,12 @@
 :root {
-  --theme-color-light: #f9fAfC;
-  --theme-color-softlight: #cbdcdf;
-  --theme-color-accent: #00B4D8;
-  --theme-color-accent-reverse: #ffee00;
-  --theme-color-dark: #023E8A;
-  --theme-color-text: #030425;
+	--theme-color-light: #f9fafc;
+	--theme-color-softlight: #cbdcdf;
+	--theme-color-accent: #00b4d8;
+	--theme-color-fg: #030425;
 }
 
 body {
-  margin: 0;
-  padding: 0;
-  color: var(--theme-color-text);
+	margin: 0;
+	padding: 0;
+	color: var(--theme-color-fg);
 }

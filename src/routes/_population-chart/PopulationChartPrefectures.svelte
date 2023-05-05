@@ -1,23 +1,19 @@
 <script lang="ts">
-	import { prefecturesMap } from '$lib/stores/prefectures-map';
+	import { _ } from 'svelte-i18n';
+
+	import { populationChartError } from '$lib/stores/display-errors';
 	import { prefectures } from '$lib/stores/population-chart-options';
 	import type PopulationChart from '$lib/utils/population-chart-setup';
 	import { populationChartProcessing } from '$lib/utils/population-chart-setup';
+	import chartConfig from '$lib/configs/population-chart-config.json';
 
 	export let populationChartObj: PopulationChart;
 
 	// 都道府県コードを東北、関東などでグループ分け
-	const prefectureGroup = [
-		[1, 2, 3, 4, 5, 6, 7],
-		[8, 9, 10, 11, 12, 13, 14],
-		[15, 16, 17, 18, 19, 20, 21, 22, 23],
-		[24, 25, 26, 27, 28, 29, 30],
-		[31, 32, 33, 34, 35],
-		[36, 37, 38, 39],
-		[40, 41, 42, 43, 44, 45, 46, 47]
-	];
+	const prefectureGroup = chartConfig.prefectureGroup;
 
-	const colorMap: { [prefCode: number]: string } = {};
+	type ColorMap = { [prefCode: number]: string };
+	let colorMap: ColorMap = {};
 
 	const switchPrefecture = (prefCode: number) => {
 		if ($populationChartProcessing) {
@@ -38,29 +34,34 @@
 
 		prefectures.set(new Set([...$prefectures]));
 
-		populationChartObj.update([...$prefectures]);
+		try {
+			populationChartObj.update([...$prefectures]);
+		} catch {
+			const error = new Error($_('error.populationChart'));
+			populationChartError.set(error);
+			return;
+		}
 	};
 
-	const mapColor = (prefCodeList: number[]) => {
+	const mapColor = (prefCodeList: number[]): ColorMap => {
+		const colorMap: ColorMap = {};
 		const chartOption = populationChartObj.chart.getOption();
 		const themeColors = chartOption.color;
 
 		if (!themeColors) {
-			return;
+			return {};
 		}
 
 		prefCodeList.forEach((code, index) => {
-			if (themeColors.length > index) {
-				colorMap[code] = themeColors[index];
-			} else {
-				colorMap[code] = themeColors[index % themeColors.length];
-			}
+			colorMap[code] = themeColors[index % themeColors.length];
 		});
+
+		return colorMap;
 	};
 
 	$: {
 		$populationChartProcessing;
-		mapColor([...$prefectures]);
+		colorMap = mapColor([...$prefectures]);
 	}
 </script>
 
@@ -74,11 +75,11 @@
 				<li
 					class="PopulationChartPrefectures__item"
 					class:PopulationChartPrefectures__item--active={$prefectures.has(code)}
-					style={`--graph-color: ${colorMap[code] ?? '#AAA'}`}
+					style:--graph-color={colorMap[code] ?? '#AAA'}
 					on:click={() => switchPrefecture(code)}
 					on:keypress={() => switchPrefecture(code)}
 				>
-					{$prefecturesMap[code]}
+					{populationChartObj.prefecturesMap[code]}
 				</li>
 			{/each}
 		</ol>
